@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HW4</title>
+	<script type="text/javascript">
+		var xmlDoc;
+
+
+	function loadXML(url){
+		//alert("JJJ");test case\
+			if (window.XMLHttpRequest){
+ 				// code for IE7+, Firefox, Chrome, Opera, Safari
+ 				xmlhttp= new XMLHttpRequest();
+ 				}
+ 			else{
+ 				// code for IE6, IE5
+ 				xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+ 				}	 
+				FLAG = 1
+				xmlhttp.onreadystatechange = function() {
+	    		if (this.readyState == 4 && this.status == 200) {
+	      			transform(this);
+	    			}
+	    		else if(this.status==404){
+	      			alert("No such file!");
+	      			FLAG = 0
+	    			}
+	  			}	
+				xmlhttp.open("GET",url,false);
+				xmlhttp.send();
+				//}///alert("dd");
+				
+				xmlDoc=xmlhttp.responseXML;
+				if(FLAG == 1){
+				 return xmlDoc;
+				}
+				else{
+				 return -1;
+				} 	
+ 				}//end loadXML
+                 
+    function show(){
+        	var URLL = document.getElementById("URL").value.trim();
+			xmlDoc = loadXML(URLL);
+          	if (xmlDoc==null){
+               alert("Error: invaild!");
+               return;
+		       }
+          	if(xmlDoc == -1)
+          		return;
+          	if(URLL == ""){
+             alert("empty query!");
+             return;
+            }
+    
+        	else{ 
+          	transform(xmlDoc);
+          	if(subrow.length == 0){
+            alert("Error: The XML file has no airplanes");
+            }
+           else{
+          	hWin = window.open("", "hw4", "height=2000,width=4000,scrollbars=yes");
+          	hWin.document.write(html_text);
+          	hWin.document.close();  
+           }
+        }
+       }
+        
+    function transform(xmlDoc){
+         ELEMENT_NODE = 1;    
+         root=xmlDoc.DocumentElement;
+         html_text="<html><head></head>" + "<bo" + "dy>";
+         html_text+="<table border='2'>";
+       
+         Airlines=xmlDoc.getElementsByTagName("Header");
+         AirlinesNodeList=Airlines.item(0).childNodes;
+           html_text+="<tbody>";
+           html_text+="<tr>";
+           
+         for(i=0;i< AirlinesNodeList.length;i++)
+           {  if(AirlinesNodeList.item(i).nodeType==ELEMENT_NODE)
+			   {
+			   	header = AirlinesNodeList.item(i).firstChild.nodeValue;
+			   
+                html_text+="<th>"+header+"</th>";  }   }
+           html_text+="</tr>";
+        
+      
+        
+          subrow=xmlDoc.getElementsByTagName("Row");
+	      x=350;  y=200;
+        
+         for(i=0;i<subrow.length;i++) 
+           {subrowNodeList=subrow.item(i).childNodes; 
+            html_text+="<tr>";      
+
+            for(j=0;j<subrowNodeList.length;j++){  
+            if(subrowNodeList.item(j).nodeType==ELEMENT_NODE){
+                
+              
+				if(subrowNodeList.item(j).nodeName=="Hubs"){
+
+               hubsNodeList = subrowNodeList.item(j).childNodes;//alert("gg");
+
+                if (hubsNodeList.length == 1){
+                    html_text+="<td>  </td>";}
+                else {
+                    html_text += "<td><ul>";
+
+                    for(m=0;m<hubsNodeList.length;m++)
+                        { 
+
+                        	if(hubsNodeList.item(m).nodeType==ELEMENT_NODE)
+
+                            {
+                            	var validhubs = hubsNodeList[m].firstChild.nodeValue;
+                            	if (validhubs != "") {
+                            		if(m==1)
+      								{
+
+        							html_text += "<li><b>"+validhubs + "</b></li>";
+      								}
+      								
+        							else{html_text += "<li>"+validhubs + "</li>";
+      									
+
+                             
+                            } 
+                        }
+                    }
+                }
+                    html_text += "</td></ul>";
+
+                }
+
+			  }
+            
+      		 else if(subrowNodeList.item(j).nodeName=="Notes"){   
+                 if(subrowNodeList[j].childNodes.length == 0){
+                html_text+="<td> </td>";}
+                else{
+		      html_text+="<td>"+subrowNodeList.item(j).firstChild.nodeValue+"</td>"; }}
+
+            else if(subrowNodeList.item(j).nodeName=="HomePage"){   
+                 if(subrowNodeList[j].childNodes.length == 0){
+                html_text+="<td> </td>";}
+                else{
+                	link=subrowNodeList.item(j).firstChild.nodeValue;
+		      html_text+="<td><a href='"+link+" '>"+link+"</a></td>"; }}
+
+            else if(subrowNodeList.item(j).nodeName=="Plane"){
+                 if(subrowNodeList[j].childNodes.length == 0){
+                html_text+="<td> </td>";}
+                else{
+			html_text+="<td><img src='"+subrowNodeList.item(j).firstChild.nodeValue+"' width='"+x+"' height='"+y+"'></td>";  }}
+                
+            else {
+                if(subrowNodeList[j].childNodes.length == 0){
+                html_text+="<td> </td>";}
+                else{
+            html_text+="<td>"+subrowNodeList.item(j).firstChild.nodeValue+"</td>";}
+		}   }    }
+            html_text+="</tr>";  
+        }
+
+         html_text+="</tbody>";
+         html_text+="</table>";
+         html_text+="</body></html>";
+            }
+
+	</script>
+
+</head>
+
+<body>
+		<center>
+     
+            <br>
+            <h1>Enter URL for Airlines List XML File<h1>
+            <form name="former" onsubmit="return show()">
+            <input type="text" id="URL" name="URL" maxlength="150" size="50" value="">
+            <br>
+            <button type="button" id="btnSearch"  name="submit"  onclick="show()">Submit Query
+            </button>
+            </form>
+           <noscript>
+</body>
+</html>
